@@ -7,15 +7,18 @@ import numpy as np
 from PyEMD import EMD
 
 def denoise(x_hat: np.ndarray, series: np.ndarray):
-    """
-    :param x_hat: SSA components
-    :param series: intial series, that we are working with
-    :return: reconstructed and denoised series
-    """
+    #     """
+    #     :param x_hat: SSA components
+    #     :param series: intial series, that we are working with
+    #     :return:
+    #       1.  reconstructed and denoised series
+    #       2. (IMFs, CMSEs)
+    #     """
     emd = EMD()
     imfs = emd(series)
 
-    groups = dict()
+    groups = {i: [] for i in range(len(imfs))}
+
     for i in range(len(x_hat)):
         best_corr = -np.inf
         i_best_corr = None
@@ -26,16 +29,21 @@ def denoise(x_hat: np.ndarray, series: np.ndarray):
                 best_corr = corr
                 i_best_corr = j
 
-        if i_best_corr in groups.keys():
+        if len(groups[i_best_corr]) != 0:
             groups[i_best_corr] += x_hat[i]
         else:
             groups[i_best_corr] = x_hat[i]
 
-    groups = np.array([groups[i] for i in sorted(list(groups.keys()))])
+    groups = [groups[i] for i in sorted(list(groups.keys()))]
 
-    norms = np.linalg.norm(groups, axis= 1) ** 2 / groups.shape[1]
+    # Determine C constant. Index of tendency change in power of IMFs.
+    norms = np.linalg.norm(imfs, axis= 1) ** 2 / imfs.shape[1]
     C = np.argmin(norms[:-2])
 
-    reconstructed_series = groups[:-2][C:].sum(axis= 0) + groups[-2:].sum(axis= 0)
+    reconstructed_series = np.zeros(imfs.shape[1])
 
-    return reconstructed_series
+    for array in groups[C:]:
+        if len(array) != 0:
+            reconstructed_series += array
+
+    return reconstructed_series, (imfs, norms)
