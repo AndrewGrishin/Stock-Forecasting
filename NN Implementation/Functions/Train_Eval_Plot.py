@@ -6,7 +6,7 @@ from tqdm.notebook import tqdm, trange
 class Train_Eval_Plot:
 
     @staticmethod
-    def train(model, criterion, metric, optimizer, epochs, train_data, verbose= True, lag= 1, metric_to_max= False, device= "cpu"):
+    def train(model, criterion, metric, optimizer, epochs, train_data, verbose= True, lag= 1, metric_to_max= False, device= "cpu", lr_scheduler= None):
 
         model = model.to(device)
         train_log = []
@@ -111,6 +111,9 @@ class Train_Eval_Plot:
             elif not verbose:
                 epochs_bar.set_description(f"Validation metrics: {val_metric_log[-1]:.2f}%. Best: {best_eval_metric_log[-1]:.2f}% (iter: {best_iter + 1})")
 
+            if lr_scheduler is not None:
+                lr_scheduler.step(best_eval_metric_log[-1])
+
         res = {
             "best model": best_model,
             "train log": train_log,
@@ -196,8 +199,8 @@ class Train_Eval_Plot:
         plt.plot(date, y_ts, label= "Actual values")
         plt.grid(True)
         plt.legend(loc= "lower right")
-        plt.text(date[0], max(y_ts) * 0.95, f"Test loss: {test_loss:.5f}", fontsize= 16)
-        plt.text(date[0], 0.9 * max(y_ts), f"Test {metric_name}: {test_metric:.2f}%", fontsize= 16)
+        plt.text(date[0], max(y_ts), f"Test loss: {test_loss:.5f}", fontsize= 16)
+        plt.text(date[0], 0.8 * max(y_ts), f"Test {metric_name}: {test_metric:.2f}%", fontsize= 16)
         plt.show()
 
     @staticmethod
