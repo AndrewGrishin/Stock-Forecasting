@@ -1,10 +1,74 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm.notebook import tqdm
 
 class SSA:
 
     @staticmethod
-    def x_to_Hankelian(x, L, K):
+    def multiple_stage_denoising(x: np.ndarray, L: int= 2, max_iter= 2000):
+        """
+        :param x: intial time series
+        :param L: number of components in decomposition
+        :return:
+            (m_opt: int - number of optimal iterations to max Signal-to-Noise Ration,
+            denoised_signal: np.ndarray - denoised signal).
+        """
+
+        def _G(components):
+            return components[:-1].sum(axis= 0), components[-1]
+
+        def _SSA(x, L, G):
+            ds_old, o = G(SSA.get_components(x, L))
+            return ds_old, o
+
+        ds_old, o = _SSA(x, L, _G)
+        n_m = o
+        old_dot_product = np.dot(ds_old, n_m)
+        m = 1
+
+        stopper = tqdm(range(1, max_iter + 1), desc= "Dividing loop")
+
+        for i in stopper:
+            m = i
+            ds_new, o = _SSA(ds_old, L, _G)
+            n_m += o
+
+            new_dot_product = np.dot(ds_new, n_m)
+
+            if new_dot_product - old_dot_product > 0:
+                break
+
+            ds_old = ds_new
+            old_dot_product = new_dot_product
+
+        return m - 1, ds_old
+
+
+    @staticmethod
+    def get_components(x: np.ndarray, L: int):
+        N = len(x)
+        L = L
+        K = N - L + 1
+
+        x_matrix = SSA.x_to_Hankelian(x, L, K)
+        U, S, Vt = np.linalg.svd(x_matrix)
+        V = Vt.T
+
+        x_hat = [
+            SSA.Hankelian_to_TS(
+                SSA.get_elementry_matrix(
+                    U[:, i].reshape(-1, 1),
+                    S[i],
+                    V[:, i]
+                )
+            ) for i in range(len(S))
+        ]
+
+        return np.array(x_hat)
+
+
+    @staticmethod
+    def x_to_Hankelian(x: np.ndarray, L: int, K: int):
         """
         :param x: initial times series
         :param L: window size
@@ -17,7 +81,7 @@ class SSA:
         return X
 
     @staticmethod
-    def Hankelian_to_TS(X):
+    def Hankelian_to_TS(X: np.ndarray):
         """
         :param X: Gets matrix (L, K)
         :return: times series, computed by means of anti-diagonals
@@ -27,7 +91,7 @@ class SSA:
         return X
 
     @staticmethod
-    def get_elementry_matrix(s, u, v):
+    def get_elementry_matrix(s: np.ndarray, u: np.ndarray, v: np.ndarray):
         """
         :param s: j-th singular value
         :param u: j-th vector in U
@@ -37,7 +101,7 @@ class SSA:
         return s * np.outer(u, v)
 
     @staticmethod
-    def get_contribution(Sigma):
+    def get_contribution(Sigma: np.ndarray):
         """
         :param Sigma: vector of singular values
         :return: (contribution of each eigen value = (singular value) ** 2, cumulative contribution)
@@ -47,7 +111,7 @@ class SSA:
         return tmp, tmp.cumsum()
 
     @staticmethod
-    def get_W_corr_matrix(x_hat, d, K, L):
+    def get_W_corr_matrix(x_hat: np.ndarray, d: int, K: int, L: int):
         """
         :param x_hat: reconstructed parts of the time series
         :param d: rank of matrix X (number of non-zero singular values)
@@ -74,7 +138,7 @@ class SSA:
         return W_corr
 
     @staticmethod
-    def plot_W_corr(W_corr):
+    def plot_W_corr(W_corr: np.ndarray):
         """
         :param W_corr: correlation matrix of reconstructed components
         :return: Nothing. Plots color map of correlation.
@@ -84,7 +148,7 @@ class SSA:
         plt.colorbar(axis.colorbar);
 
     @staticmethod
-    def plot_x_hat(x_hat, x):
+    def plot_x_hat(x_hat: np.ndarray, x: np.ndarray):
         """
         :param x_hat: reconstructed TS in decomposed view
         :param x: initial TS
@@ -100,7 +164,7 @@ class SSA:
         plt.show()
 
     @staticmethod
-    def plot_contribution(sigma_contribution):
+    def plot_contribution(sigma_contribution: np.ndarray):
         """
         :param sigma_contribution: (normed to 1 contribution of each singular value, cumsum of normed contribution)
         :return: Nothing. Plots 2 figures (Singular contribution, Cumsum of singular contribution)
@@ -119,7 +183,7 @@ class SSA:
         plt.show()
 
     @staticmethod # Спросить о правильности!!!!!
-    def forecast(Q, reconstructed_values, r, U, N, L):
+    def forecast(Q: np.ndarray, reconstructed_values: np.ndarray, r: int, U: np.ndarray, N: int, L: int):
         """
         :param Q: steps to forecast
         :param reconstructed_values: reconstruction of initial TS
@@ -143,7 +207,7 @@ class SSA:
         return forecasted
 
     @staticmethod
-    def plot_prediction(reconstructed_values, forecasted, x):
+    def plot_prediction(reconstructed_values: np.ndarray, forecasted: np.ndarray, x: np.ndarray):
 
         plt.figure(figsize= (18, 8))
         plt.plot(np.concatenate([np.array(reconstructed_values), forecasted], axis= 0), label= "Reconstruction + forecast", c= "orange")

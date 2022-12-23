@@ -4,7 +4,7 @@
 """
 
 import numpy as np
-from PyEMD import EMD
+from PyEMD import EEMD, EMD
 
 def denoise(x_hat: np.ndarray, series: np.ndarray):
     #     """
@@ -37,8 +37,8 @@ def denoise(x_hat: np.ndarray, series: np.ndarray):
     groups = [groups[i] for i in sorted(list(groups.keys()))]
 
     # Determine C constant. Index of tendency change in power of IMFs.
-    norms = np.linalg.norm(imfs, axis= 1) ** 2 / imfs.shape[1]
-    C = np.argmin(norms[:-2])
+    norms = np.mean(imfs ** 2, axis= 1)
+    C = np.argmin(norms[:-1])
 
     reconstructed_series = np.zeros(imfs.shape[1])
 
