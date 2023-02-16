@@ -6,7 +6,17 @@ from tqdm.notebook import tqdm, trange
 class Train_Eval_Plot:
 
     @staticmethod
-    def train(model, criterion, metric, optimizer, epochs, train_data, verbose= True, lag= 1, metric_to_max= False, device= "cpu", lr_scheduler= None):
+    def train(model,
+              criterion,
+              metric,
+              optimizer,
+              epochs,
+              train_data,
+              verbose= True,
+              lag= 1,
+              metric_to_max= False,
+              device= "cpu",
+              lr_scheduler= None):
 
         model = model.to(device)
         train_log = []

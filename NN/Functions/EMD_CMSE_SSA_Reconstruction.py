@@ -4,7 +4,7 @@
 """
 
 import numpy as np
-from PyEMD import EEMD, EMD
+from PyEMD import EMD
 
 def denoise(x_hat: np.ndarray, series: np.ndarray):
     #     """
