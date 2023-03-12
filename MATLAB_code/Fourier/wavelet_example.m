@@ -1,7 +1,7 @@
 clc; clear;
 
 %% Загрузка данных
-data = readtable("AAPL 1980 2022.csv", "VariableNamingRule","preserve");
+data = rmmissing(readtable("../../Data/Chinese Companies/Kweichow Moutai 2001 2022.csv", "VariableNamingRule","preserve"));
 dates_prices = data.Date;
 open_prices = data.Open;
 Fs_prices = hours(mean(diff(dates_prices)));
@@ -20,11 +20,11 @@ wt_returns_abs = abs(wt_returns);
 
 %% Построение scalogram
 
-plot_scalogaram_plots( ...
+plot_scalogram_plots( ...
     dates_prices, open_prices, ...
     dates_returns, returns, ...
     dates_prices, f_prices, wt_prices_abs,...
-    dates_returns, f_returns, wt_returns_abs)
+    dates_returns, f_returns, wt_returns_abs, "Kweichow Moutai")
 
 %% Очистка посредством Wavelet анализа
 

@@ -1,4 +1,5 @@
-[X, Y] = meshgrid(linspace(eps, 1, 50));
-Z = 1 - X.^Y;
+[X, Y] = meshgrid(linspace(-8, 8, 50));
+R = sqrt(X.^2 + Y.^2) + eps;
+Z = sin(R) ./ R;
 surf(X, Y, Z, 'EdgeColor','none')
 colorbar
