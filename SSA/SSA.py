@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 from tqdm.notebook import tqdm
 
 class SSA:
@@ -63,7 +62,6 @@ class SSA:
         ]
 
         return np.array(x_hat)
-
 
     @staticmethod
     def x_to_Hankelian(x: np.ndarray, L: int, K= None):
