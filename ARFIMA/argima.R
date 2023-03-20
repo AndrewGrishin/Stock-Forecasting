@@ -51,18 +51,19 @@ get_wapes <- function(path, metrics, prices_not_returns) {
   
 }
 
-#path_us <- "../Data/American Companies/"
-#us_prices <- get_wapes(path_us, wape, T)
-#us_returns = get_wapes(path_us, wape, F)
-#us_df <- data.frame(
-#  Company = names(us_prices), 
-#  "WAPE (price)" = us_prices, 
-#  "WAPE (return)" = us_returns)
-#colnames(us_df) <- c("Company", "WAPE (price)", "WAPE (return)")
-#write.csv(us_df, "arfima_us.csv", row.names = F)
+path_us <- "../Data/American Companies/"
+us_prices <- get_wapes(path_us, wape, T)
+us_returns = get_wapes(path_us, wape, F)
+us_df <- data.frame(
+  Company = names(us_prices), 
+  "WAPE (price)" = us_prices, 
+  "WAPE (return)" = us_returns)
+colnames(us_df) <- c("Company", "WAPE (price)", "WAPE (return)")
+write.csv(us_df, "arfima_us.csv", row.names = F)
 
 path_ch <- "../Data/Chinese Companies/"
 ch_prices <- get_wapes(path_ch, wape, T)
+
 ch_returns <-  get_wapes(path_ch, wape, F)
 ch_df <- data.frame(
   Company = names(ch_prices), 
