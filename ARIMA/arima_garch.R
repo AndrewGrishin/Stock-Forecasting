@@ -55,19 +55,19 @@ get_wapes <- function(path, metrics, prices_not_returns) {
       save.forecast <- forecast(object = model.fit, h = 1, level = 99)
       f <- save.forecast$mean[1]
       
-      residuals <- model.fit$residuals
-      garch_model <- ugarchspec(
-        mean.model = list(armaOrder = c(0,0), arfima= FALSE, include.mean = TRUE),
-        variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
-        distribution.model = "norm"
-      )
+      #residuals <- model.fit$residuals
+      #garch_model <- ugarchspec(
+      #  mean.model = list(armaOrder = c(0,0), arfima= FALSE, include.mean = TRUE),
+      #  variance.model = list(model = "sGARCH", garchOrder = c(1,1)),
+      #  distribution.model = "norm"
+      #)
       
-      garch_model_fit <- ugarchfit(data = residuals, spec = garch_model)
-      garch_model_forecast <- ugarchforecast(fitORspec = garch_model_fit, n.ahead = 1)
-      mu <- fitted(garch_model_forecast)
-      sigma <- sigma(garch_model_forecast)
+      #garch_model_fit <- ugarchfit(data = residuals, spec = garch_model)
+      #garch_model_forecast <- ugarchforecast(fitORspec = garch_model_fit, n.ahead = 1)
+      #mu <- fitted(garch_model_forecast)
+      #sigma <- sigma(garch_model_forecast)
       
-      forecast.values[i] <- f + mu + sqrt(sigma)
+      forecast.values[i] <- f# + mu + sqrt(sigma)
       
     }
     wape.value <- metrics(series.diff.adj.test, forecast.values)
@@ -85,7 +85,7 @@ us_df <- data.frame(
   "WAPE (price)" = us_prices, 
   "WAPE (return)" = us_returns)
 colnames(us_df) <- c("Company", "WAPE (price)", "WAPE (return)")
-write.csv(us_df, "arima_grach_us.csv", row.names = F)
+write.csv(us_df, "arima_us.csv", row.names = F)
 
 path_ch <- "../Data/Chinese Companies/"
 ch_prices <- get_wapes(path_ch, wape, T)
@@ -95,4 +95,4 @@ ch_df <- data.frame(
   "WAPE (price)" = ch_prices, 
   "WAPE (return)" = ch_returns)
 colnames(ch_df) <- c("Company", "WAPE (price)", "WAPE (return)")
-write.csv(ch_df, "arima_garch_ch.csv", row.names = F)
+write.csv(ch_df, "arima_ch.csv", row.names = F)
